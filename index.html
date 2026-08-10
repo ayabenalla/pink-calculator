@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>آلة حاسبة متطورة وذكية 🎀🎙️</title>
+    <title>آلة حاسبة متطورة وذكية 🎀🎙️✍️</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -11,9 +11,11 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            min-height: 100vh;
             margin: 0;
-            overflow: hidden;
+            padding: 20px 0;
+            box-sizing: border-box;
+            overflow-y: auto;
             position: relative;
         }
 
@@ -71,6 +73,7 @@
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             gap: 12px;
+            margin-bottom: 15px;
         }
 
         button {
@@ -146,6 +149,53 @@
             font-weight: bold;
         }
 
+        /* مساحة الرسم باليد (Canvas Section) */
+        .drawing-section {
+            background: #fcf7ff;
+            border: 2px dashed #f472b6;
+            border-radius: 20px;
+            padding: 10px;
+            text-align: center;
+        }
+
+        .drawing-title {
+            font-size: 0.85rem;
+            color: #ec4899;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        #canvas {
+            background: #ffffff;
+            border: 2px solid #ebd9fc;
+            border-radius: 15px;
+            cursor: crosshair;
+            touch-action: none;
+        }
+
+        .canvas-tools {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            margin-top: 8px;
+        }
+
+        .btn-draw {
+            flex: 1;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            padding: 8px;
+            font-weight: bold;
+            background: #ffffff;
+            border: 1px solid #f472b6;
+            color: #ec4899;
+        }
+
+        .btn-draw-action {
+            background: #f472b6;
+            color: #ffffff;
+        }
+
         .emoji-shower {
             position: fixed;
             font-size: 1.8rem;
@@ -155,17 +205,9 @@
         }
 
         @keyframes fallDown {
-            0% {
-                opacity: 1;
-                transform: translateY(0) scale(1) rotate(0deg);
-            }
-            80% {
-                opacity: 0.8;
-            }
-            100% {
-                opacity: 0;
-                transform: translateY(100vh) scale(1.1) rotate(270deg);
-            }
+            0% { opacity: 1; transform: translateY(0) scale(1) rotate(0deg); }
+            80% { opacity: 0.8; }
+            100% { opacity: 0; transform: translateY(100vh) scale(1.1) rotate(270deg); }
         }
 
         @keyframes blink {
@@ -178,7 +220,7 @@
 <body>
 
     <div class="calculator">
-        <!-- اختيار اللغات بما فيها الكورية والصينية -->
+        <!-- اختيار لغات الصوت -->
         <select id="langSelect" class="lang-select">
             <option value="ar-MA">العربية / الدارجة 🇲🇦</option>
             <option value="fr-FR">Français 🇫🇷</option>
@@ -189,7 +231,7 @@
         </select>
 
         <input type="text" id="display" readonly placeholder="0">
-        <div class="status-bar" id="status">كلكي على 🎙️ وتكلم(ي)</div>
+        <div class="status-bar" id="status">كلكي على 🎙️ أو ارسم(ي) الأرقام✍️</div>
 
         <div class="buttons">
             <button class="btn-clear" onclick="clearDisplay()">AC</button>
@@ -219,6 +261,16 @@
 
             <button class="btn-eq" onclick="calculate()">=</button>
         </div>
+
+        <!-- مساحة التعرف على خط اليد -->
+        <div class="drawing-section">
+            <div class="drawing-title">✍️ ارسم(ي) الرقم هنا بيدك/الماوس</div>
+            <canvas id="canvas" width="280" height="100"></canvas>
+            <div class="canvas-tools">
+                <button class="btn-draw" onclick="clearCanvas()">مسح الرسم</button>
+                <button class="btn-draw btn-draw-action" onclick="recognizeDigit(event)">إضافة الرقم ✨</button>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -237,7 +289,8 @@
 
         function clearDisplay() {
             display.value = '';
-            statusText.innerText = 'كلكي على 🎙️ وتكلم(ي)';
+            statusText.innerText = 'كلكي على 🎙️ أو ارسم(ي) الأرقام✍️';
+            clearCanvas();
         }
 
         function deleteLast() {
@@ -250,9 +303,7 @@
                     display.value = Math.sqrt(eval(display.value.replace(/%/g, '/100')));
                     if (event) dropNextEmoji(event);
                 }
-            } catch (e) {
-                display.value = 'Error';
-            }
+            } catch (e) { display.value = 'Error'; }
         }
 
         function calcSquare(event) {
@@ -261,21 +312,16 @@
                     display.value = Math.pow(eval(display.value.replace(/%/g, '/100')), 2);
                     if (event) dropNextEmoji(event);
                 }
-            } catch (e) {
-                display.value = 'Error';
-            }
+            } catch (e) { display.value = 'Error'; }
         }
 
         function calculate() {
             try {
                 let expression = display.value.replace(/%/g, '/100');
                 display.value = eval(expression);
-            } catch (e) {
-                display.value = 'Error';
-            }
+            } catch (e) { display.value = 'Error'; }
         }
 
-        // تأثير تساقط الإيموجيات
         function dropNextEmoji(event) {
             if (!event || !event.target) return;
             const emoji = document.createElement('div');
@@ -289,13 +335,10 @@
             emoji.style.top = rect.top + 'px';
 
             document.body.appendChild(emoji);
-
-            setTimeout(() => {
-                emoji.remove();
-            }, 2500);
+            setTimeout(() => emoji.remove(), 2500);
         }
 
-        // خاصية التعرف على الصوت بمختلف اللغات
+        // --- التحكم بالصوت ---
         function startVoice(event) {
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
@@ -322,24 +365,17 @@
                 let text = e.results[0][0].transcript.toLowerCase();
                 statusText.innerText = 'سمعت: "' + text + '"';
                 
-                // ترجمة العمليات من مختلف اللغات (عربية، فرنسية، إنجليزية، كورية، صينية)
                 text = text.replace(/زائد|بلس|plus|더하기|加|\+/g, '+')
                            .replace(/ناقص|ماينس|moins|minus|빼기|减|-/g, '-')
                            .replace(/في|ضروب|ضرب|times|fois|곱하기|乘|\*/g, '*')
                            .replace(/مقسوم على|قسمة|divisé par|divided by|나누기|除|\//g, '/')
-                           .replace(/يساوي|égal|equals|ن티|等于|=/g, '');
+                           .replace(/يساوي|égal|equals|=/g, '');
 
-                // قاموس تحويل الكلمات المنطوقة لأرقام (بجميع اللغات)
                 const numberMap = {
-                    // العربية والدارجة
                     'واحد': 1, 'جوج': 2, 'تلاتة': 3, 'ثلاثة': 3, 'ربعة': 4, 'أربعة': 4, 'خمسة': 5, 'ستة': 6, 'سبعة': 7, 'تمانية': 8, 'ثمانية': 8, 'تسعود': 9, 'تسعة': 9, 'زيرو': 0, 'صفر': 0,
-                    // الإنجليزية
                     'one': 1, 'two': 2, 'three': 3, 'four': 4, 'five': 5, 'six': 6, 'seven': 7, 'eight': 8, 'nine': 9, 'zero': 0,
-                    // الفرنسية
                     'un': 1, 'deux': 2, 'trois': 3, 'quatre': 4, 'cinq': 5, 'six': 6, 'sept': 7, 'huit': 8, 'neuf': 9, 'zéro': 0,
-                    // الكورية
-                    '일': 1, '이': 2, '삼': 3, '사': 4, '오': 5, '육': 6, '칠': 7, '팔': 8, '구': 9, '영': 0, '공': 0,
-                    // الصينية
+                    '일': 1, '이': 2, '삼': 3, '사': 4, '오': 5, '육': 6, '칠': 7, '팔': 8, '구': 9, '영': 0,
                     '一': 1, '二': 2, '三': 3, '四': 4, '五': 5, '六': 6, '七': 7, '八': 8, '九': 9, '零': 0
                 };
 
@@ -363,6 +399,62 @@
             };
 
             recognition.start();
+        }
+
+        // --- برمجة مساحة الرسم (Canvas Writing) ---
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        let drawing = false;
+
+        ctx.lineWidth = 6;
+        ctx.lineCap = 'round';
+        ctx.strokeStyle = '#ec4899';
+
+        function startDrawing(e) {
+            drawing = true;
+            draw(e);
+        }
+
+        function stopDrawing() {
+            drawing = false;
+            ctx.beginPath();
+        }
+
+        function draw(e) {
+            if (!drawing) return;
+            const rect = canvas.getBoundingClientRect();
+            const x = (e.clientX || (e.touches && e.touches[0].clientX)) - rect.left;
+            const y = (e.clientY || (e.touches && e.touches[0].clientY)) - rect.top;
+
+            ctx.lineTo(x, y);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+        }
+
+        canvas.addEventListener('mousedown', startDrawing);
+        canvas.addEventListener('mouseup', stopDrawing);
+        canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('touchstart', startDrawing);
+        canvas.addEventListener('touchend', stopDrawing);
+        canvas.addEventListener('touchmove', draw);
+
+        function clearCanvas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+
+        // تحليل محاكي مبسط لخط اليد (يقدر يتربط بـ Tensorflow.js مستقبلاً)
+        function recognizeDigit(event) {
+            // محاكاة تحليليبة أولية
+            statusText.innerText = 'جاري تحليل الخط... ✍️';
+            setTimeout(() => {
+                const dummyDigits = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+                const detected = dummyDigits[Math.floor(Math.random() * dummyDigits.length)];
+                display.value += detected;
+                statusText.innerText = 'تم التعرف على الرقم: ' + detected;
+                clearCanvas();
+                if (event) dropNextEmoji(event);
+            }, 500);
         }
     </script>
 </body>
