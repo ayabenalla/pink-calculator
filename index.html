@@ -109,17 +109,21 @@
         }
 
         .emoji-shower {
-            position: absolute;
-            top: -60px;
-            font-size: 2.2rem;
-            animation: fall 4s linear forwards;
+            position: fixed;
+            font-size: 1.8rem;
+            animation: fallDown 1.5s linear forwards;
             pointer-events: none;
-            z-index: 1;
+            z-index: 100;
         }
 
-        @keyframes fall {
-            to {
-                transform: translateY(115vh) rotate(360deg);
+        @keyframes fallDown {
+            0% {
+                opacity: 1;
+                transform: translateY(0) scale(1) rotate(0deg);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(120vh) scale(1.2) rotate(360deg);
             }
         }
     </style>
@@ -131,28 +135,28 @@
         <div class="buttons">
             <button class="btn-clear" onclick="clearDisplay()">AC</button>
             <button class="btn-op" onclick="deleteLast()">⌫</button>
-            <button class="btn-op" onclick="appendToDisplay('%')">%</button>
-            <button class="btn-op" onclick="appendToDisplay('/')">÷</button>
+            <button class="btn-op" onclick="appendToDisplay('%', event)">%</button>
+            <button class="btn-op" onclick="appendToDisplay('/', event)">÷</button>
 
-            <button class="btn-op" onclick="calcSquareRoot()">√</button>
-            <button class="btn-op" onclick="calcSquare()">x²</button>
-            <button class="btn-op" onclick="appendToDisplay('*')">×</button>
-            <button class="btn-op" onclick="appendToDisplay('-')">-</button>
+            <button class="btn-op" onclick="calcSquareRoot(event)">√</button>
+            <button class="btn-op" onclick="calcSquare(event)">x²</button>
+            <button class="btn-op" onclick="appendToDisplay('*', event)">×</button>
+            <button class="btn-op" onclick="appendToDisplay('-', event)">-</button>
 
-            <button class="btn-num" onclick="appendToDisplay('7')">7</button>
-            <button class="btn-num" onclick="appendToDisplay('8')">8</button>
-            <button class="btn-num" onclick="appendToDisplay('9')">9</button>
-            <button class="btn-op" onclick="appendToDisplay('+')">+</button>
+            <button class="btn-num" onclick="appendToDisplay('7', event)">7</button>
+            <button class="btn-num" onclick="appendToDisplay('8', event)">8</button>
+            <button class="btn-num" onclick="appendToDisplay('9', event)">9</button>
+            <button class="btn-op" onclick="appendToDisplay('+', event)">+</button>
 
-            <button class="btn-num" onclick="appendToDisplay('4')">4</button>
-            <button class="btn-num" onclick="appendToDisplay('5')">5</button>
-            <button class="btn-num" onclick="appendToDisplay('6')">6</button>
-            <button class="btn-op" onclick="appendToDisplay('.')">.</button>
+            <button class="btn-num" onclick="appendToDisplay('4', event)">4</button>
+            <button class="btn-num" onclick="appendToDisplay('5', event)">5</button>
+            <button class="btn-num" onclick="appendToDisplay('6', event)">6</button>
+            <button class="btn-op" onclick="appendToDisplay('.', event)">.</button>
 
-            <button class="btn-num" onclick="appendToDisplay('1')">1</button>
-            <button class="btn-num" onclick="appendToDisplay('2')">2</button>
-            <button class="btn-num" onclick="appendToDisplay('3')">3</button>
-            <button class="btn-num" onclick="appendToDisplay('0')">0</button>
+            <button class="btn-num" onclick="appendToDisplay('1', event)">1</button>
+            <button class="btn-num" onclick="appendToDisplay('2', event)">2</button>
+            <button class="btn-num" onclick="appendToDisplay('3', event)">3</button>
+            <button class="btn-num" onclick="appendToDisplay('0', event)">0</button>
 
             <button class="btn-eq" onclick="calculate()">=</button>
         </div>
@@ -163,9 +167,9 @@
         const customEmojis = ['🎀', '🌸', '🩷', '🦋', '🧸', '✨', '🍒', '🍓', '🍉', '🎈'];
         let currentEmojiIndex = 0;
 
-        function appendToDisplay(value) {
+        function appendToDisplay(value, event) {
             display.value += value;
-            dropNextEmoji();
+            if (event) dropNextEmoji(event);
         }
 
         function clearDisplay() {
@@ -176,22 +180,22 @@
             display.value = display.value.slice(0, -1);
         }
 
-        function calcSquareRoot() {
+        function calcSquareRoot(event) {
             try {
                 if (display.value) {
                     display.value = Math.sqrt(eval(display.value.replace(/%/g, '/100')));
-                    dropNextEmoji();
+                    if (event) dropNextEmoji(event);
                 }
             } catch (e) {
                 display.value = 'Error';
             }
         }
 
-        function calcSquare() {
+        function calcSquare(event) {
             try {
                 if (display.value) {
                     display.value = Math.pow(eval(display.value.replace(/%/g, '/100')), 2);
-                    dropNextEmoji();
+                    if (event) dropNextEmoji(event);
                 }
             } catch (e) {
                 display.value = 'Error';
@@ -207,20 +211,22 @@
             }
         }
 
-        function dropNextEmoji() {
-            const body = document.body;
+        function dropNextEmoji(event) {
             const emoji = document.createElement('div');
             emoji.className = 'emoji-shower';
             emoji.innerText = customEmojis[currentEmojiIndex];
             
             currentEmojiIndex = (currentEmojiIndex + 1) % customEmojis.length;
-            emoji.style.left = Math.random() * 80 + 10 + 'vw';
 
-            body.appendChild(emoji);
+            const rect = event.target.getBoundingClientRect();
+            emoji.style.left = (rect.left + rect.width / 2 - 10) + 'px';
+            emoji.style.top = rect.top + 'px';
+
+            document.body.appendChild(emoji);
 
             setTimeout(() => {
                 emoji.remove();
-            }, 4000);
+            }, 1500);
         }
     </script>
 </body>
