@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>آلة حاسبة متطورة 🎀</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #ebd9fc;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .calculator {
+            background: #ffffff;
+            border-radius: 40px;
+            box-shadow: 0 15px 35px rgba(147, 51, 234, 0.15);
+            width: 340px;
+            padding: 25px;
+            z-index: 10;
+            position: relative;
+            border: 3px solid #f472b6;
+        }
+
+        #display {
+            background: #fcf7ff;
+            border: 2px solid #f472b6;
+            border-radius: 20px;
+            color: #000000;
+            font-size: 2.2rem;
+            text-align: right;
+            padding: 15px;
+            margin-bottom: 20px;
+            width: 100%;
+            box-sizing: border-box;
+            outline: none;
+            font-weight: bold;
+        }
+
+        .buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+        }
+
+        button {
+            border-radius: 50%;
+            font-size: 1.3rem;
+            padding: 16px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        button:active {
+            transform: scale(0.92);
+        }
+
+        .btn-num {
+            background: #ffffff;
+            color: #000000;
+            border: 2px solid #e5e7eb;
+            font-weight: bold;
+        }
+
+        .btn-num:hover {
+            background: #f9fafb;
+        }
+
+        .btn-op {
+            background: #ffffff;
+            color: #ec4899;
+            border: 2px solid #f472b6;
+            font-weight: bold;
+        }
+
+        .btn-op:hover {
+            background: #fdf2f8;
+        }
+
+        .btn-eq {
+            background: #ec4899;
+            color: #ffffff;
+            border: 2px solid #ec4899;
+            grid-column: span 2;
+            border-radius: 25px;
+            font-weight: bold;
+            font-size: 1.6rem;
+        }
+
+        .btn-eq:hover {
+            background: #db2777;
+        }
+
+        .btn-clear {
+            background: #ffffff;
+            color: #ec4899;
+            border: 2px solid #f472b6;
+            font-weight: bold;
+        }
+
+        .emoji-shower {
+            position: absolute;
+            top: -60px;
+            font-size: 2.2rem;
+            animation: fall 4s linear forwards;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        @keyframes fall {
+            to {
+                transform: translateY(115vh) rotate(360deg);
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="calculator">
+        <input type="text" id="display" readonly placeholder="0">
+        <div class="buttons">
+            <button class="btn-clear" onclick="clearDisplay()">AC</button>
+            <button class="btn-op" onclick="deleteLast()">⌫</button>
+            <button class="btn-op" onclick="appendToDisplay('%')">%</button>
+            <button class="btn-op" onclick="appendToDisplay('/')">÷</button>
+
+            <button class="btn-op" onclick="calcSquareRoot()">√</button>
+            <button class="btn-op" onclick="calcSquare()">x²</button>
+            <button class="btn-op" onclick="appendToDisplay('*')">×</button>
+            <button class="btn-op" onclick="appendToDisplay('-')">-</button>
+
+            <button class="btn-num" onclick="appendToDisplay('7')">7</button>
+            <button class="btn-num" onclick="appendToDisplay('8')">8</button>
+            <button class="btn-num" onclick="appendToDisplay('9')">9</button>
+            <button class="btn-op" onclick="appendToDisplay('+')">+</button>
+
+            <button class="btn-num" onclick="appendToDisplay('4')">4</button>
+            <button class="btn-num" onclick="appendToDisplay('5')">5</button>
+            <button class="btn-num" onclick="appendToDisplay('6')">6</button>
+            <button class="btn-op" onclick="appendToDisplay('.')">.</button>
+
+            <button class="btn-num" onclick="appendToDisplay('1')">1</button>
+            <button class="btn-num" onclick="appendToDisplay('2')">2</button>
+            <button class="btn-num" onclick="appendToDisplay('3')">3</button>
+            <button class="btn-num" onclick="appendToDisplay('0')">0</button>
+
+            <button class="btn-eq" onclick="calculate()">=</button>
+        </div>
+    </div>
+
+    <script>
+        let display = document.getElementById('display');
+        const customEmojis = ['🎀', '🌸', '🩷', '🦋', '🧸', '✨', '🍒', '🍓', '🍉', '🎈'];
+        let currentEmojiIndex = 0;
+
+        function appendToDisplay(value) {
+            display.value += value;
+            dropNextEmoji();
+        }
+
+        function clearDisplay() {
+            display.value = '';
+        }
+
+        function deleteLast() {
+            display.value = display.value.slice(0, -1);
+        }
+
+        function calcSquareRoot() {
+            try {
+                if (display.value) {
+                    display.value = Math.sqrt(eval(display.value.replace(/%/g, '/100')));
+                    dropNextEmoji();
+                }
+            } catch (e) {
+                display.value = 'Error';
+            }
+        }
+
+        function calcSquare() {
+            try {
+                if (display.value) {
+                    display.value = Math.pow(eval(display.value.replace(/%/g, '/100')), 2);
+                    dropNextEmoji();
+                }
+            } catch (e) {
+                display.value = 'Error';
+            }
+        }
+
+        function calculate() {
+            try {
+                let expression = display.value.replace(/%/g, '/100');
+                display.value = eval(expression);
+            } catch (e) {
+                display.value = 'Error';
+            }
+        }
+
+        function dropNextEmoji() {
+            const body = document.body;
+            const emoji = document.createElement('div');
+            emoji.className = 'emoji-shower';
+            emoji.innerText = customEmojis[currentEmojiIndex];
+            
+            currentEmojiIndex = (currentEmojiIndex + 1) % customEmojis.length;
+            emoji.style.left = Math.random() * 80 + 10 + 'vw';
+
+            body.appendChild(emoji);
+
+            setTimeout(() => {
+                emoji.remove();
+            }, 4000);
+        }
+    </script>
+</body>
+</html>
